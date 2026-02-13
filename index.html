@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赵欣悦 | AI Engineer & PM</title>
+    <style>
+        /* --- 1. 全局变量 --- */
+        :root {
+            --bg-color: #fcfcfc;
+            --text-main: #222;
+            --text-sub: #666;
+            --accent: #000;
+            --card-bg: #ffffff;
+            --gap: 2rem;
+            --radius: 12px;
+            --modal-radius: 16px;
+            --transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; 
+        }
+
+        /* --- 2. 主容器 --- */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            height: 90vh;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: var(--gap);
+        }
+
+        /* --- 3. 左侧：个人信息 --- */
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 2rem; 
+        }
+
+        .avatar {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            background-image: url('images/0.jpg');
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .avatar:hover { transform: scale(1.05); }
+
+        .name { font-size: 2.5rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.2rem; color: #000; }
+        .title { font-size: 1rem; color: var(--text-sub); font-weight: 400; margin-bottom: 0.5rem; }
+        .education { font-size: 0.95rem; color: var(--text-main); font-weight: 600; margin-bottom: 2rem; opacity: 0.9; }
+        
+        .bio { font-size: 0.95rem; color: var(--text-main); max-width: 300px; margin-bottom: 3rem; text-align: justify; line-height: 1.8; opacity: 0.85; }
+
+        /* --- 联系方式 (修复版) --- */
+        .contact-info { display: flex; flex-direction: column; gap: 0.8rem; width: 100%; }
+        
+        .contact-item { 
+            display: flex; 
+            align-items: baseline; 
+            font-size: 0.9rem; 
+        }
+        
+        /* ✨ 修复点：增加宽度 + 右侧间距 */
+        .contact-item .label { 
+            display: inline-block; 
+            width: 75px;           /* 加宽，给 Email 留足空间 */
+            margin-right: 10px;    /* 强制留白，防止紧贴 */
+            flex-shrink: 0;        
+            font-weight: 600; 
+            color: var(--text-main); 
+            opacity: 0.4; 
+        }
+        
+        .contact-item a { text-decoration: none; color: var(--text-sub); transition: var(--transition); letter-spacing: 0.5px; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        .contact-item a:hover { color: #000; }
+
+        /* --- 4. 右侧：项目展示 --- */
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: var(--gap);
+            height: 100%;
+        }
+
+        .card {
+            position: relative;
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            transition: var(--transition);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.6s ease;
+            filter: grayscale(100%);
+        }
+        
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 2rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .card-title { color: #fff; font-size: 1.6rem; font-weight: 600; margin-bottom: 0.4rem; letter-spacing: 1px; }
+        .card-desc { color: rgba(255,255,255,0.9); font-size: 0.9rem; font-weight: 300; letter-spacing: 0.5px; }
+
+        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+        .card:hover .card-image { transform: scale(1.1); filter: grayscale(0%); }
+        .card:hover .card-overlay { opacity: 1; transform: translateY(0); }
+
+        /* --- 5. 模态窗 (Modal) --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active { display: flex; opacity: 1; }
+
+        .modal-content {
+            background-color: #fff;
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            border-radius: var(--modal-radius);
+            overflow-y: auto; /* 允许内部滚动 */
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal.active .modal-content { transform: scale(1); }
+
+        /* ✨ 修复点：粘性定位关闭按钮 */
+        /* 这样按钮会随着滚动条一直悬浮在右上角，不会消失 */
+        .close-btn {
+            position: sticky;  /* 关键修改：粘性定位 */
+            top: 15px;         /* 距离滚动容器顶部 15px */
+            float: right;      /* 靠右 */
+            margin-right: 15px;/* 右边距 */
+            z-index: 100;      /* 保证层级最高 */
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9); /* 加深背景，防遮挡 */
+            backdrop-filter: blur(4px);
+            color: #333;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            margin-bottom: -36px; /* 负边距技巧：让它不占据内容空间，浮在上面 */
+        }
+        
+        .close-btn:hover { background: #fff; transform: scale(1.1); }
+
+        /* --- 6. 详情页组件 --- */
+        .detail-video-container {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            position: relative;
+        }
+
+        .detail-hero-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: var(--modal-radius) var(--modal-radius) 0 0;
+        }
+
+        .detail-video { width: 100%; height: 100%; object-fit: cover; }
+        .detail-body { padding: 2.5rem 3rem; }
+        .detail-header { margin-bottom: 2rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 1rem; }
+        .detail-title { font-size: 2rem; font-weight: 700; color: #111; margin-bottom: 0.3rem; }
+        .detail-subtitle { font-size: 1rem; color: #666; font-weight: 400; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+        
+        .info-group { opacity: 0; transform: translateY(10px); animation: fadeUp 0.5s forwards; }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+        .info-group:nth-child(1) { animation-delay: 0.1s; }
+        .info-group:nth-child(2) { animation-delay: 0.15s; }
+        .info-group:nth-child(3) { animation-delay: 0.2s; }
+        .info-group:nth-child(4) { animation-delay: 0.25s; }
+
+        .label {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            padding: 3px 8px;
+            background: #f4f4f4;
+            border-radius: 4px;
+        }
+
+        .text-content { font-size: 0.95rem; color: #444; line-height: 1.7; text-align: justify; }
+        .result-highlight { font-weight: 700; }
+        .strategy-list { list-style: none; display: grid; gap: 1rem; margin-top: 0.5rem; }
+        .strategy-item { background: #fafafa; padding: 1.2rem; border-radius: 8px; border-left: 3px solid #000; }
+        .strategy-title { font-weight: 700; font-size: 0.95rem; display: block; margin-bottom: 0.3rem; }
+        .strategy-text { font-size: 0.9rem; color: #555; }
+        
+        .detail-image { width: 100%; margin-top: 1rem; border-radius: 8px; }
+
+        /* Project 2: PDF Button */
+        .pdf-section { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+        .pdf-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 14px 28px;
+            background-color: #111;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        .pdf-btn:hover { background-color: #333; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* Project 2: Dual Images */
+        .dual-images { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+        .dual-images img { width: 100%; height: auto; border-radius: 8px; object-fit: cover; }
+
+        @media (max-width: 768px) {
+            body { height: auto; overflow-y: auto; padding: 2rem 0; }
+            .container { grid-template-columns: 1fr; height: auto; gap: 3rem; }
+            .showcase-grid { grid-template-columns: 1fr; height: auto; gap: 1.5rem; }
+            .card { height: 280px; }
+            .card-overlay { opacity: 1; transform: translateY(0); }
+            .card-image { filter: grayscale(0%); }
+            
+            .modal-content { width: 95%; max-height: 90vh; }
+            .detail-video-container { height: 220px; }
+            .detail-body { padding: 1.5rem; }
+            .detail-title { font-size: 1.5rem; }
+            .close-btn { width: 32px; height: 32px; font-size: 18px; top: 10px; right: 10px; }
+            .dual-images { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <aside class="profile-section">
+            <div class="avatar"></div>
+            <h1 class="name">赵欣悦</h1>
+            <p class="title">AI Engineer & Product Manager</p> 
+            <p class="education">Master from University College London</p>
+            
+            <p class="bio">
+                专注于AI产品与大模型的深度探索。<br>
+                致力于在硬核技术与人文疗愈之间，<br>
+                寻找数字体验的温暖平衡。
+            </p>
+
+            <div class="contact-info">
+                <div class="contact-item"><span class="label">Tel:</span><a href="tel:+8613605201851">+86 136 0520 1851</a></div>
+                <div class="contact-item"><span class="label">Email:</span><a href="mailto:xinyuezhao2002@gmail.com">xinyuezhao2002@gmail.com</a></div>
+            </div>
+        </aside>
+
+        <main class="showcase-grid">
+            <div id="project1-card" class="card">
+                <div class="card-image" style="background-image: url('images/1.jpg')"></div>
+                <div class="card-overlay">
+                    <h3 class="card-title">具身智能</h3>
+                    <p class="card-desc">多模态 · Sim2Real · 数据飞轮</p>
+                </div>
+            </div>
+
+            <div id="project2-card" class="card">
+                <div class="card-image" style="background-image: url('images/2.jpg')"></div>
+                <div class="card-overlay">
+                    <h3 class="card-title">数智战场</h3>
+                    <p class="card-desc">工程化 · 数字孪生 · 自动化建模</p>
+                </div>
+            </div>
+
+            <a href="https://angeltarot.netlify.app/" target="_blank" class="card">
+                <div class="card-image" style="background-image: url('images/3.jpg')"></div>
+                <div class="card-overlay">
+                    <h3 class="card-title">天使疗愈</h3>
+                    <p class="card-desc">C端产品 · 人机交互 · 情感陪伴</p>
+                </div>
+            </a>
+
+            <div id="project4-card" class="card">
+                <div class="card-image" style="background-image: url('images/4.jpg')"></div>
+                <div class="card-overlay">
+                    <h3 class="card-title">城市重建</h3>
+                    <p class="card-desc">科研项目 · 架构设计 · 生成式模型</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-project1" class="modal">
+        <div class="modal-content">
+            <div class="close-btn">&times;</div>
+            <div class="detail-video-container">
+                <video class="detail-video" controls autoplay muted loop><source src="media/project1.mp4" type="video/mp4"></video>
+            </div>
+            <div class="detail-body">
+                <div class="detail-header"><h2 class="detail-title">Pneuma Reverie</h2><p class="detail-subtitle">基于物理先验与正反馈迭代的具身智能系统</p></div>
+                 <div class="info-grid">
+                    <div class="info-group"><span class="label">背景 Background</span><p class="text-content">传统软体机器人存在非线性控制难题与物理安全瓶颈，且预设程序逻辑僵化，难以适配非结构化场景下的复杂语义交互及情感交互需求。</p></div>
+                    <div class="info-group"><span class="label">目标 Goal</span><p class="text-content">构建刚柔耦合的具身智能系统，依托物理先验保障硬件安全，通过正反馈机制实现交互策略的自主进化与场景泛化。</p></div>
+                     <div class="info-group">
+                        <span class="label">策略 Strategy</span>
+                        <ul class="strategy-list">
+                            <li class="strategy-item"><span class="strategy-title">① 架构设计</span><span class="strategy-text">搭建 LLM + Motion Planner 协同中枢，设计 Visual-RAG 双级检索链路；借助向量数据库 (A1) 完成当前场景语义召回，再从结构化数据库 (A2) 中映射匹配策略，有效降低大模型决策幻觉。</span></li>
+                            <li class="strategy-item"><span class="strategy-title">② 安全约束</span><span class="strategy-text">构建基于 Kangaroo 仿真的物理知识库，将复杂非线性形变极限转化为可计算的物理安全阈值，为硬件层执行机构划定绝对运动安全边界。</span></li>
+                            <li class="strategy-item"><span class="strategy-title">③ 系统迭代</span><span class="strategy-text">搭建情感分析模块，系统自动甄别用户正向反馈，将优质交互案例实时回流至 A1/A2 数据库，驱动系统交互能力自适应迭代与持续进化。</span></li>
+                        </ul>
+                    </div>
+                    <div class="info-group"><span class="label">成果 Result</span><p class="text-content">复杂场景下交互意图对齐准确率较传统 if-else 规则逻辑提升 <strong>40%</strong>，硬件过载损坏率维持 <strong>0%</strong>。</p></div>
+                     <div class="info-group"><img src="images/project1-detail.jpg" alt="Detail" class="detail-image"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-project2" class="modal">
+        <div class="modal-content">
+            <div class="close-btn">&times;</div>
+            
+            <div class="detail-body">
+                <div class="detail-header">
+                    <h2 class="detail-title">军用数字化智慧战场</h2>
+                    <p class="detail-subtitle">工程化 · 数字孪生 · 自动化建模</p>
+                </div>
+                
+                <div class="info-grid">
+                    <div class="info-group"><span class="label">背景 Background</span><p class="text-content">传统军用数字孪生体面临人工建模周期长、自动化模型几何属性差等痛点，难以满足动态战场推演需求。</p></div>
+                    <div class="info-group"><span class="label">目标 Goal</span><p class="text-content">搭建端到端 AI 建模流程，实现遮挡补全与几何精修，达成效率与精度的双重提升。</p></div>
+                    <div class="info-group">
+                        <span class="label">策略 Strategy</span>
+                        <ul class="strategy-list">
+                            <li class="strategy-item"><span class="strategy-title">① 需求定义</span><span class="strategy-text">深度对接军方，明确项目需求，撰写 PRD 定义自动化流程 (图像处理→法线预测→模型重建) 与交付标准。</span></li>
+                            <li class="strategy-item"><span class="strategy-title">② 协同落地</span><span class="strategy-text">协同研发与测绘团队推进全流程落地；确立效果评估标准，持续优化建模精度。</span></li>
+                        </ul>
+                    </div>
+                    <div class="info-group"><span class="label">成果 Result</span><p class="text-content">自动化建模速度提至分钟级，较人工效率提升 <strong>30倍</strong>，模型几何优化率达 <strong>60%</strong>。</p></div>
+
+                    <div class="info-group pdf-section">
+                        <a href="media/project2.pdf" target="_blank" class="pdf-btn">📄 阅读完整项目文档 (PDF)</a>
+                    </div>
+                    
+                    <div class="info-group">
+                         <span class="label">项目展示 Gallery</span>
+                         <div class="dual-images">
+                             <img src="images/2-1.jpg" alt="Gallery 1">
+                             <img src="images/2-2.jpg" alt="Gallery 2">
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-video-container" style="height: 500px;">
+                <video class="detail-video" controls muted loop><source src="media/project2.mp4" type="video/mp4"></video>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-project4" class="modal">
+        <div class="modal-content">
+            <div class="close-btn">&times;</div>
+            <img src="images/sat2city-cover.jpg" class="detail-hero-image" alt="Sat2City Cover">
+            <div class="detail-body">
+                <div class="detail-header"><h2 class="detail-title">Sat2City-Gen</h2><p class="detail-subtitle">基于生成式视频扩散与3DGS的城市重建</p></div>
+                <div class="info-grid">
+                    <div class="info-group"><span class="label">背景 Background</span><p class="text-content">传统3D建模依赖昂贵的倾斜摄影且受航禁限制。单视角卫星图获取易，但存在严重的深度缺失与侧面盲区。</p></div>
+                    <div class="info-group"><span class="label">目标 Goal</span><p class="text-content">构建自动化AIGC管线，实现单张卫星图分钟级生成高保真、多视角的3D城市模型。</p></div>
+                    <div class="info-group">
+                        <span class="label">策略 Strategy</span>
+                        <ul class="strategy-list">
+                            <li class="strategy-item"><span class="strategy-title">① 原型复现</span><span class="strategy-text">独立负责底层算法环境搭建与核心代码部署；利用 AI 辅助编程构建实验级 MVP 流程，先行验证“单目生成 3D”的技术可行性。</span></li>
+                            <li class="strategy-item"><span class="strategy-title">② 流程规划</span><span class="strategy-text">协同规划“2D-Video-3D”跨模态生成路径，整合视频扩散模型与 3DGS 技术，实现自动化高保真的三维场景重建。</span></li>
+                            <li class="strategy-item"><span class="strategy-title">③ 指标定义</span><span class="strategy-text">建立基于 PSNR 及几何一致性的评价体系，通过 Bad Case 归因分析识别生成幻觉问题，并反馈算法端进行模型调优。</span></li>
+                        </ul>
+                    </div>
+                    <div class="info-group"><span class="label">成果 Result</span><p class="text-content">成功跑通 AIGC 城市重建全流程，降低城市级数字孪生 <strong>90%</strong> 的建模成本。</p></div>
+                </div>
+            </div>
+            <div class="detail-video-container" style="height: 500px;">
+                <video class="detail-video" controls muted loop><source src="media/sat2city-demo.mp4" type="video/mp4"></video>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal1 = document.getElementById('modal-project1');
+        const modal2 = document.getElementById('modal-project2');
+        const modal4 = document.getElementById('modal-project4');
+        const card1 = document.getElementById('project1-card');
+        const card2 = document.getElementById('project2-card');
+        const card4 = document.getElementById('project4-card');
+
+        function openModal(modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal1.classList.remove('active');
+            modal2.classList.remove('active');
+            modal4.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        card1.addEventListener('click', () => openModal(modal1));
+        card2.addEventListener('click', () => openModal(modal2));
+        card4.addEventListener('click', () => openModal(modal4));
+
+        document.querySelectorAll('.close-btn').forEach(btn => btn.addEventListener('click', closeModal));
+        window.addEventListener('click', (e) => { if (e.target.classList.contains('modal')) closeModal(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+    </script>
+</body>
+</html>
